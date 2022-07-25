@@ -10,8 +10,8 @@ provider:
     PG_HOST: cloudx-aws.cwlxkclzz3mh.us-east-1.rds.amazonaws.com
     PG_PORT: 5432
     PG_DATABASE: shop
-    PG_USERNAME: postgres
-    PG_PASSWORD: 2VFSjW9UYFyz10UZgWTS1 #this is not real password
+    PG_USERNAME:
+    PG_PASSWORD:
 plugins:
   - serverless-esbuild
 functions:
