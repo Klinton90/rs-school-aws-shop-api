@@ -1,17 +1,36 @@
 import { formatJSONResponse, formatNotFoundError } from '@libs/api-gateway';
+import { createConnection } from '@libs/db';
 import { middyfy } from '@libs/lambda';
 import { APIGatewayProxyEvent } from 'aws-lambda/trigger/api-gateway-proxy';
+import { Client } from 'pg';
 
-var products = require('../../assets/products.json');
+const getProductById = async (event: APIGatewayProxyEvent) => {
+  console.log("getProductById pathParameters", event.pathParameters);
 
-const getProductsList = async (event: APIGatewayProxyEvent) => {
   const { id } = event.pathParameters;
-  console.log("id", id);
-  console.log("event", event);
+
   if (!id) {
     return formatNotFoundError();
   }
-  const product = products.find(product => product.id === id);
+
+  let product;
+  const client: Client = createConnection();
+
+  try {
+    await client.connect();
+    const res = await client.query(`
+      select p.*, s.count
+      from products p
+      inner join stocks s on p.id = s.product_id 
+      where p.id = '${id}'
+    `);
+    product = res.rows[0];
+  } catch (error) {
+    console.log('DB error occured', error);
+  } finally {
+    client.end();
+  }
+
   if (!product) {
     return formatNotFoundError();
   }
@@ -20,4 +39,4 @@ const getProductsList = async (event: APIGatewayProxyEvent) => {
   });
 };
 
-export const main = middyfy(getProductsList);
+export const main = middyfy(getProductById);

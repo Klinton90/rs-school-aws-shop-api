@@ -1,0 +1,19 @@
+create table products (
+	id uuid not null default uuid_generate_v4() primary key,
+	title text not null,
+	description text,
+	price integer
+);
+
+create table stocks (
+	id uuid not null default uuid_generate_v4() primary key,
+	product_id uuid not null,
+	"count" integer not null,
+	constraint stock_product
+		foreign key(product_id)
+		references products(id)
+	on delete cascade
+	on update cascade
+);
+
+create extension if not exists "uuid-ossp";
