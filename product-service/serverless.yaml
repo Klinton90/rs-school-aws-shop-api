@@ -11,7 +11,7 @@ provider:
     PG_PORT: 5432
     PG_DATABASE: shop
     PG_USERNAME: postgres
-    PG_PASSWORD: 2VFSjW9UYFyz10UZgWTS
+    PG_PASSWORD: 2VFSjW9UYFyz10UZgWTS1 #this is not real password
 plugins:
   - serverless-esbuild
 functions:
