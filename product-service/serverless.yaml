@@ -1,6 +1,16 @@
 service: product-service2
 frameworkVersion: '3'
-
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    target: node14
+    # define:
+    platform: node
+    concurrency: 10
 provider:
   name: aws
   runtime: nodejs14.x
@@ -10,8 +20,8 @@ provider:
     PG_HOST: cloudx-aws.cwlxkclzz3mh.us-east-1.rds.amazonaws.com
     PG_PORT: 5432
     PG_DATABASE: shop
-    PG_USERNAME:
-    PG_PASSWORD:
+    PG_USERNAME: postgres
+    PG_PASSWORD: 4VFSjW9UFYyz15UZgWTS
 plugins:
   - serverless-esbuild
 functions:

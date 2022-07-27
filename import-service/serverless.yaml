@@ -1,0 +1,70 @@
+service: import-service
+
+frameworkVersion: '3'
+
+custom:
+  BUCKET_NAME: cloudx-aws
+  BUCKET: arn:aws:s3:::${self:custom.BUCKET_NAME}
+  REGION: us-east-1
+
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    target: node14
+    # define:
+    platform: node
+    concurrency: 10
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+  stage: dev
+  region: ${self:custom.REGION}
+
+  environment:
+    BUCKET_NAME: ${self:custom.BUCKET_NAME}
+    BUCKET: ${self:custom.BUCKET}
+    REGION: ${self:custom.REGION}
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action: "s3:ListBucket"
+      Resource:
+        - ${self:custom.BUCKET}
+    - Effect: "Allow"
+      Action: "s3:*"
+      Resource:
+        - ${self:custom.BUCKET}/*
+
+plugins:
+  - serverless-esbuild
+
+functions:
+  importProductsFile:
+    handler: src/functions/importProductsFile/handler.main
+    events:
+      - http:
+          method: get
+          path: import
+          cors: true
+          request:
+            parameters:
+              querystrings:
+                name: true
+  importFileParser:
+    handler: src/functions/importFileParser/handler.main
+    events:
+      - s3:
+          bucket: ${self:custom.BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploaded/
+          existing: true
+          
+                  
+
+
