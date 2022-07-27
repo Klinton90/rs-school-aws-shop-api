@@ -4,8 +4,6 @@ import { middyfy } from '@libs/lambda';
 import { Client } from 'pg';
 
 const createProduct = async (event) => {
-  console.log("createProduct body", event.body);
-
   let product;
 
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;

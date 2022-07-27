@@ -1,6 +1,16 @@
 service: product-service2
 frameworkVersion: '3'
-
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude:
+      - aws-sdk
+    target: node14
+    # define:
+    platform: node
+    concurrency: 10
 provider:
   name: aws
   runtime: nodejs14.x
