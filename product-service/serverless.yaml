@@ -1,6 +1,10 @@
 service: product-service2
 frameworkVersion: '3'
+
 custom:
+  REGION: us-east-1
+  ACCOUNT_ID: 005863346550
+
   esbuild:
     bundle: true
     minify: false
@@ -11,45 +15,101 @@ custom:
     # define:
     platform: node
     concurrency: 10
+
+plugins:
+  - serverless-esbuild
+
 provider:
   name: aws
   runtime: nodejs14.x
   stage: dev
   region: us-east-1
+
   environment:
     PG_HOST: cloudx-aws.cwlxkclzz3mh.us-east-1.rds.amazonaws.com
     PG_PORT: 5432
     PG_DATABASE: shop
-    PG_USERNAME:
-    PG_PASSWORD:
-plugins:
-  - serverless-esbuild
+    PG_USERNAME: 
+    PG_PASSWORD: 
+
+    CREATE_PRODUCTS_TOPIC:
+      Ref: createProductTopic
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action: sns:*
+      Resource:
+        Ref: createProductTopic
+
+resources:
+  Resources:
+    createProductTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: createProductTopic
+
+    createProductSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: qqq@epam.com
+        Protocol: email
+        FilterPolicy:
+          count:
+            - numeric:
+              - '>='
+              - 10
+        TopicArn:
+          Ref: createProductTopic
+
+    createProductSubscriptionSmallCount:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: www@gmail.com
+        Protocol: email
+        FilterPolicy:
+          count:
+            - numeric:
+              - '<'
+              - 10
+        TopicArn:
+          Ref: createProductTopic
+
 functions:
   getProductsList:
     handler: src/functions/getProductsList/handler.main
     events:
      - http:
-        method: 'get'
-        path: 'products'
+        method: get
+        path: products
         cors: true
+
   getProductById:
     handler: src/functions/getProductById/handler.main
     events:
      - http:
-        method: 'get'
-        path: 'products/{id}'
+        method: get
+        path: products/{id}
         cors: true
         request:
           parameters:
             paths:
               id: true
+
   createProduct:
     handler: src/functions/createProduct/handler.main
     events:
      - http:
-        method: 'post'
-        path: 'products'
+        method: post
+        path: products
         cors: true
+
+  catalogBatchProcess:
+    handler: src/functions/catalogBatchProcess/handler.main
+    events:
+      - sqs:
+          batchSize: 5
+          arn: arn:aws:sqs:us-east-1:005863346550:catalogItemsQueue
+
 
 
 
