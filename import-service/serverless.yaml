@@ -1,11 +1,11 @@
 service: import-service
-
 frameworkVersion: '3'
 
 custom:
   BUCKET_NAME: cloudx-aws
   BUCKET: arn:aws:s3:::${self:custom.BUCKET_NAME}
   REGION: us-east-1
+  ACCOUNT_ID: 005863346550
 
   esbuild:
     bundle: true
@@ -30,18 +30,35 @@ provider:
     BUCKET: ${self:custom.BUCKET}
     REGION: ${self:custom.REGION}
 
+    CATALOG_ITEMS_QUEUE:
+      Ref: catalogItemsQueue
+
   iamRoleStatements:
     - Effect: "Allow"
       Action: "s3:ListBucket"
       Resource:
         - ${self:custom.BUCKET}
+
     - Effect: "Allow"
       Action: "s3:*"
       Resource:
         - ${self:custom.BUCKET}/*
 
+    - Effect: Allow
+      Action: sqs:*
+      Resource:
+        Fn::GetAtt: [ catalogItemsQueue, Arn ]
+
 plugins:
   - serverless-esbuild
+
+resources:
+  Resources:
+    catalogItemsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: catalogItemsQueue
+    
 
 functions:
   importProductsFile:
